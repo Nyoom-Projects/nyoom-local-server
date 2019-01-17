@@ -26,3 +26,16 @@ The goal of Nyoom is to store a list of programming Projects, with the added cap
 - A URL to use as a Health check for the current deployment
 - A URL to use to determine what version of the project is currently deployed
 - A script to determine what is the version of the source code
+
+
+
+# Deep-dive on how it works
+## Adding a project:
+1. Using the Nyoom-CLI; a user will execute `nyoom create project` which will prompt them for the minimum required information to create a Project on Nyoom
+2. The CLI will call the _Nyoom-local-server (N-LS)_ with these parameters, and then:
+3. N-LS will upload the project configuration to the centralized (remote) host. This project will then by sync'ed accross all Nodes, allowing any other linked PC to use the configuration. 
+
+## Checking out a project:
+1. Using the Nyoom-CLI; a user will execute `nyoom checkout project` which will prompt them for the project name.
+2. Nyoom will list all available Nodes that can execute this command, and after the user selects the Node, then Nyoom will ask that Node to check whether the source code is already checked out. 
+3. If not, Nyoom will prompt the user for a checkout directory (defaulting to what the Node has configured), and then send the Checkout task to that Node.
