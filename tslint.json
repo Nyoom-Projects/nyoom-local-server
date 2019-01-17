@@ -1,0 +1,51 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "no-console": {
+            "severity": "warning",
+            "options": [
+                "debug",
+                "log",
+                "time",
+                "timeEnd",
+                "trace"
+            ]
+        },
+        "object-literal-sort-keys": [
+            false,
+            "ignore-case",
+            "locale-compare",
+            "match-declaration-order",
+            "shorthand-first"
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-leading-underscore"
+        ],
+        "no-consecutive-blank-lines": [
+            true,
+            2
+        ],
+        "quotemark": {
+            "severity": "warning",
+            "options": [
+                true,
+                "single",
+                "avoid-escape",
+                "avoid-template"
+            ]
+        }
+    },
+    "rulesDirectory": [],
+    "linterOptions": {
+        "exclude": [
+            "**/node_modules/**"
+        ]
+    }
+}
