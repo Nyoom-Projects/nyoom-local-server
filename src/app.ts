@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 
 import pingRoutes from './api/routes/pingRoutes';
+import projectRoutes from './api/routes/projectRoutes';
 import DSCore from './core';
 
 
@@ -25,6 +26,7 @@ export default (core: DSCore) => {
     app.use(core.createMiddleware());
 
     pingRoutes(app);
+    projectRoutes(app);
 
     return app;
 };

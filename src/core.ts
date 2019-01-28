@@ -6,23 +6,16 @@ class DSCore {
     private username: string;
 
 
-    constructor(loginCallback: (success: boolean, data: any) => void, errorCallback?: (error, args) => void) {
+    constructor(loginCallback: (success: boolean, data: any) => void, errorCallback?: (error: any, args: any) => void) {
         const botCore = this;
 
-        const ds = deepstream('192.168.2.37:7520');
+        const ds = deepstream('10.5.54.81:7520');
         botCore.deepstreamClient = ds.login({
             username: 'pawel',
             password: 'Password@1',
         }, (success, data = {}) => {
             if (success) {
                 this.username = (data && data.username) || 'pawel';
-
-                botCore.deepstreamClient.record.getRecord('bots/' + this.username).whenReady((record) => {
-                    const allowedUserIDs = (record.get('allowedUserIDs') || []);
-                    console.log('allowedUserIDs', allowedUserIDs);
-
-                    record.set('allowedUserIDs', allowedUserIDs);
-                });
             }
             loginCallback(success, data);
         });
@@ -34,8 +27,8 @@ class DSCore {
 
     public createMiddleware() {
         const core = this;
-        return (req, res, next) => {
-            req.locals.core = core;
+        return (req: any, _res: any, next: any) => {
+            req.core = core;
 
             next();
         };
@@ -68,6 +61,46 @@ class DSCore {
             messageID,
             replyStream: 'ingress/tunnel/' + this.username,
         });
+    }
+
+    public getProjectList() {
+        return this.deepstreamClient.record.getList('projects/' + this.username);
+    }
+
+    public addProject(name: string, callback?: (error?: any) => void) {
+        const projectPath = this.createProjectPath(name);
+
+        this.getProjectList().whenReady((list: any) => {
+            if (list.getEntries().find((item: any) => item === projectPath) !== undefined) {
+                callback({
+                    code: 400,
+                    message: `Project '${name}' already exists`,
+                });
+            } else {
+                const project = this.deepstreamClient.record.getRecord(projectPath);
+
+                project.set({
+                    name,
+                }, (error: string) => {
+                    if (error) {
+                        callback({
+                            message: error,
+                        });
+                    } else {
+                        list.addEntry(projectPath);
+                        callback();
+                    }
+                });
+            }
+        });
+    }
+
+    public getProject(name: string) {
+        return this.deepstreamClient.record.getRecord(this.createProjectPath(name));
+    }
+
+    private createProjectPath(name: string) {
+        return `project/${this.username}/${name}`;
     }
 }
 
