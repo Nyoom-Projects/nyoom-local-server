@@ -20,6 +20,7 @@ export default (core: DSCore) => {
     });
 
     app.use(bodyParser.urlencoded({extended: true}));
+    app.use(bodyParser.text());
     app.use(bodyParser.json());
 
 
