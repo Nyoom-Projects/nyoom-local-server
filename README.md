@@ -1,6 +1,6 @@
 # nyoom-local-server
 This repo stores the local (client-side) server that runs Nyoom tasks. 
-This server accepts commands from Nyoom-CLI (via a REST API), and either forwards tasks to aa Nyoom-host-server (to shedule tasks for non-local machines) or runs the tasks locally.
+This server accepts commands from Nyoom-CLI (via a REST API), and forwards requests to a Nyoom-host-server (to schedule tasks for nyoom-local servers to execute).
 
 
 Since most of the magic happens in this layer, I will use this as the primary source of explanation as to how Nyoom works.
