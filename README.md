@@ -1,5 +1,5 @@
 # nyoom-local-server
-This repo stores the local (client-side) server that runs Nyoom tasks. 
+This repo stores the local (client-side) server that runs Nyoom tasks.
 This server accepts commands from Nyoom-CLI (via a REST API), and forwards requests to a Nyoom-host-server (to schedule tasks for nyoom-local servers to execute).
 
 
@@ -33,9 +33,16 @@ The goal of Nyoom is to store a list of programming Projects, with the added cap
 ## Adding a project:
 1. Using the Nyoom-CLI; a user will execute `nyoom create project` which will prompt them for the minimum required information to create a Project on Nyoom
 2. The CLI will call the _Nyoom-local-server (N-LS)_ with these parameters, and then:
-3. N-LS will upload the project configuration to the centralized (remote) host. This project will then by sync'ed accross all Nodes, allowing any other linked PC to use the configuration. 
+3. N-LS will upload the project configuration to the centralized (remote) host. This project will then by sync'ed accross all Nodes, allowing any other linked PC to use the configuration.
 
 ## Checking out a project:
 1. Using the Nyoom-CLI; a user will execute `nyoom checkout project` which will prompt them for the project name.
-2. Nyoom will list all available Nodes that can execute this command, and after the user selects the Node, then Nyoom will ask that Node to check whether the source code is already checked out. 
+2. Nyoom will list all available Nodes that can execute this command, and after the user selects the Node, then Nyoom will ask that Node to check whether the source code is already checked out.
 3. If not, Nyoom will prompt the user for a checkout directory (defaulting to what the Node has configured), and then send the Checkout task to that Node.
+
+## Executing tasks:
+1. Using the Nyoom-CLI; a user will execute `nyoom exec <project-name> :<task...>[@node]`, which will execute the specified task(s) on the specified project.
+	Notes: Tasks can be specified in the format of `:task1 :task2 or :task1,task2`
+	The `@node` parameter is to allow the task to be scheduled on a specific node - Nyoom will default to scheduling the task on the user's current node.
+2. Tasks can be run against multiple projects, by adding the projects to the command, such as `nyoom exec project1 project2 my-awesome-project :build`
+3. Nyoom will create and schedule the tasks on the various nodes, and automatically queue each task (per project) to be executed after the previous task completes successfully.
