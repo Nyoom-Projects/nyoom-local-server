@@ -9,7 +9,7 @@ class DSCore {
     constructor(loginCallback: (success: boolean, data: any) => void, errorCallback?: (error: any, args: any) => void) {
         const botCore = this;
 
-        const ds = deepstream('10.5.54.81:7520');
+        const ds = deepstream('10.5.34.82:7520');
         botCore.deepstreamClient = ds.login({
             username: 'pawel',
             password: 'Password@1',
@@ -97,6 +97,20 @@ class DSCore {
 
     public getProject(name: string) {
         return this.deepstreamClient.record.getRecord(this.createProjectPath(name));
+    }
+
+    public getProjects(paths: string[], callback: (projects: any[]) => void) {
+        Promise.all(paths.map((path: string) => {
+            return new Promise((resolve) => {
+                this.deepstreamClient.record.getRecord(path)
+                .whenReady((record: deepstreamIO.Record) => {
+                    resolve({
+                        ...record.get(),
+                        name: path.substring(path.lastIndexOf('/') + 1),
+                    });
+                });
+            });
+        })).then(callback);
     }
 
     private createProjectPath(name: string) {

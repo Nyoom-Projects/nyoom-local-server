@@ -4,6 +4,7 @@ import express from 'express';
 
 import pingRoutes from './api/routes/pingRoutes';
 import projectRoutes from './api/routes/projectRoutes';
+import taskRoutes from './api/routes/taskRoutes';
 import DSCore from './core';
 
 
@@ -28,6 +29,7 @@ export default (core: DSCore) => {
 
     pingRoutes(app);
     projectRoutes(app);
+    taskRoutes(app);
 
     return app;
 };
