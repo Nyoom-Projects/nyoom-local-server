@@ -186,11 +186,15 @@ class DSCore {
         this.getCommandRecord(id).whenReady((record: deepstreamIO.Record) => {
             const command = record.get();
 
-            this.commandQueue.queueCommand(command, (success: boolean, result: any) => {
-                record.set('result', result);
-                if (success && command.nextCommandID) {
-                    this.fetchAndQueueCommand(command.nextCommandID);
-                }
+            this.getProjectMetaData(command.project.name).whenReady((metaData: deepstreamIO.Record) => {
+                command.workDir = metaData.get().workDir;
+
+                this.commandQueue.queueCommand(command, (success: boolean, result: any) => {
+                    record.set('result', result);
+                    if (success && command.nextCommandID) {
+                        this.fetchAndQueueCommand(command.nextCommandID);
+                    }
+                });
             });
         });
     }

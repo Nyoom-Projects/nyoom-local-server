@@ -9,6 +9,11 @@ export default class CommandQueue {
     constructor() {
         this.queue = new Queue((command, cb) => {
             (async () => {
+                if (!command.workDir) {
+                    throw {
+                        message: 'Project does not have local reference - unable to find work directory',
+                    };
+                }
                 switch (command.type) {
                     case 'SHELL':
                         console.info(`\n\nExecuting \`${command.command}\` in '${command.workDir}':`);

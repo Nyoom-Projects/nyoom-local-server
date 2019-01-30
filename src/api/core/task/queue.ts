@@ -41,11 +41,15 @@ export const queue = async (core: any, projectParameters: string[], taskParamete
             );
             const commandsList = taskItems.map((taskItem: any) => taskItem.commands.map((command: any) => ({
                 ...command,
-                workDir: command.workDir || project.projectPath || project.name,
                 task: taskItem,
             })));
 
-            const commands = flatten(commandsList);
+            const commands = flatten(commandsList).map((command: any) => {
+                command.project = project;
+                command.project.tasks = undefined;
+
+                return command;
+            });
             console.log(commands);
 
             core.publishCommands('mac1', commands);

@@ -3,18 +3,15 @@ import path from 'path';
 import {exec, popd, pushd} from 'shelljs';
 
 
-const ROOT_WORK_DIR = process.env.ROOT_WORK_DIR || '';
-
 export default (command: string, workDir: string) => {
     return new Promise((resolve, reject) => {
         if (workDir) {
-            const fullWorkPath = path.join(ROOT_WORK_DIR, workDir);
-            if (fs.existsSync(fullWorkPath) && fs.statSync(fullWorkPath).isDirectory()) {
-                pushd('-q', fullWorkPath);
+            if (fs.existsSync(workDir) && fs.statSync(workDir).isDirectory()) {
+                pushd('-q', workDir);
             } else {
                 reject({
                     stdout: '',
-                    stderr: `Path '${fullWorkPath}' does not exist on filesystem`,
+                    stderr: `Path '${workDir}' does not exist on filesystem`,
                     exitCode: 1,
                 });
 
