@@ -89,27 +89,6 @@ class DSCore {
         });
     }
 
-    public reply(data: any, message: string) {
-        this.deepstreamClient.event.emit(data.replyStream, {
-            clientID: data.clientID,
-            messageID: data.messageID,
-            message,
-        });
-    }
-
-    public getUserTargetList(clientID: string) {
-        return this.deepstreamClient.record.getList(`targets/${this.username}/${clientID}`);
-    }
-
-    public sendMessageFromClient(target: string, clientID: string, messageContent: string, messageID: string) {
-        this.deepstreamClient.event.emit(target, {
-            clientID,
-            message: messageContent,
-            messageID,
-            replyStream: 'ingress/tunnel/' + this.username,
-        });
-    }
-
     public getProjectList() {
         return this.deepstreamClient.record.getList('projects/' + this.username);
     }
@@ -139,6 +118,12 @@ class DSCore {
                     }
                 });
             }
+        });
+    }
+
+    public setProjectMetaData(name: string, data: any, callback?: (error?: any) => void) {
+        this.getProjectMetaData(name).whenReady((record: deepstreamIO.Record) => {
+            record.set(data, callback);
         });
     }
 
