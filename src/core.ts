@@ -1,18 +1,29 @@
 import deepstream = require('deepstream.io-client-js');
+import {v4 as uuidV4} from 'uuid';
+import CommandQueue from './queue';
 
+
+interface ILoginData {
+    username: string;
+    password: string;
+    nodeName: string;
+}
 
 class DSCore {
     private deepstreamClient: deepstreamIO.Client;
     private username: string;
+    private nodeName: string;
+    private commandQueue = new CommandQueue();
 
 
-    constructor(loginCallback: (success: boolean, data: any) => void, errorCallback?: (error: any, args: any) => void) {
+    constructor(loginData: ILoginData, loginCallback: (success: boolean, data: any) => void, errorCallback?: (error: any, args: any) => void) {
         const botCore = this;
 
-        const ds = deepstream('10.5.34.82:7520');
+        const ds = deepstream('10.5.43.58:7520');
+        this.nodeName = loginData.nodeName;
         botCore.deepstreamClient = ds.login({
-            username: 'pawel',
-            password: 'Password@1',
+            username: loginData.username,
+            password: loginData.password,
         }, (success, data = {}) => {
             if (success) {
                 this.username = (data && data.username) || 'pawel';
@@ -38,8 +49,44 @@ class DSCore {
         this.deepstreamClient.on('error', callback);
     }
 
-    public addMessageHandler(callback: (data: any) => void) {
-        this.deepstreamClient.event.subscribe(`ingress/bot/${this.username}`, callback);
+    public listenForCommands() {
+        const commandGroupIngest = this.deepstreamClient.record.getList(this.createCommandGroupPath(this.nodeName));
+        commandGroupIngest.subscribe((commandItemIDs: any) => {
+            console.log('commandItemIDs', commandItemIDs);
+
+
+            for (const id of commandItemIDs) {
+                commandGroupIngest.removeEntry(id);
+                this.fetchAndQueueCommand(id);
+            }
+        }, true);
+    }
+
+    public publishCommands(targetNodeName: string, commandsToPublish: any[]) {
+        const commandGroupIngestRecord = this.deepstreamClient.record.getList(this.createCommandGroupPath(targetNodeName));
+
+        (async () => {
+            const commands = commandsToPublish.map((command: any) => {
+                command.id = this.generateID();
+
+                return command;
+            });
+
+            commands.forEach((command: any, index: number, array: any[]) => {
+                if (array.length > index + 1) {
+                    command.nextCommandID = array[index + 1].id;
+                }
+            });
+
+            return commands;
+        })().then((commands: any) => {
+            commandGroupIngestRecord.whenReady((commandGroupIngestList: deepstreamIO.List) => {
+                Promise.all(commands.map((command: any) => this.createCommandTaskAndReturnID(command)))
+                    .then((commandRecordIDs: any[]) => {
+                        commandGroupIngestList.addEntry(commandRecordIDs[0]);
+                    });
+            });
+        });
     }
 
     public reply(data: any, message: string) {
@@ -99,6 +146,10 @@ class DSCore {
         return this.deepstreamClient.record.getRecord(this.createProjectPath(name));
     }
 
+    public getProjectMetaData(name: string) {
+        return this.deepstreamClient.record.getRecord(this.createProjectMetaDataPath(name));
+    }
+
     public getProjects(paths: string[], callback: (projects: any[]) => void) {
         Promise.all(paths.map((path: string) => {
             return new Promise((resolve) => {
@@ -113,8 +164,55 @@ class DSCore {
         })).then(callback);
     }
 
+    public getCommandRecord(id: string) {
+        return this.deepstreamClient.record.getRecord(this.createCommandPath(id));
+    }
+
+    private createCommandTaskAndReturnID(command: any) {
+        command.id = command.id || this.generateID();
+        const id = command.id;
+        const commandRecord = this.getCommandRecord(id);
+
+        return new Promise((resolve) => {
+            commandRecord.whenReady((record: any) => {
+                record.set(command);
+
+                resolve(id);
+            });
+        });
+    }
+
+    private fetchAndQueueCommand(id: string) {
+        this.getCommandRecord(id).whenReady((record: deepstreamIO.Record) => {
+            const command = record.get();
+
+            this.commandQueue.queueCommand(command, (success: boolean, result: any) => {
+                record.set('result', result);
+                if (success && command.nextCommandID) {
+                    this.fetchAndQueueCommand(command.nextCommandID);
+                }
+            });
+        });
+    }
+
+    private generateID() {
+        return uuidV4();
+    }
+
     private createProjectPath(name: string) {
         return `project/${this.username}/${name}`;
+    }
+
+    private createProjectMetaDataPath(name: string) {
+        return `project-metadata/${this.username}/${this.nodeName}/${name}`;
+    }
+
+    private createCommandGroupPath(nodeName: string) {
+        return `commandGroupIngest/${this.username}/${nodeName}`;
+    }
+
+    private createCommandPath(id: string) {
+        return `command/${this.username}/${id}`;
     }
 }
 

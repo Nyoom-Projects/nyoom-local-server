@@ -2,6 +2,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 
+import commandRoutes from './api/routes/commandRoutes';
 import pingRoutes from './api/routes/pingRoutes';
 import projectRoutes from './api/routes/projectRoutes';
 import taskRoutes from './api/routes/taskRoutes';
@@ -27,6 +28,7 @@ export default (core: DSCore) => {
 
     app.use(core.createMiddleware());
 
+    commandRoutes(app);
     pingRoutes(app);
     projectRoutes(app);
     taskRoutes(app);

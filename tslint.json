@@ -40,7 +40,10 @@
                 "avoid-escape",
                 "avoid-template"
             ]
-        }
+        },
+        "max-line-length": [
+            false
+        ]
     },
     "rulesDirectory": [],
     "linterOptions": {

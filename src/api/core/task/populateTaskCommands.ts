@@ -5,6 +5,7 @@ export default async (project: any, taskItem: any) => {
             commands: [{
                 type: 'SHELL',
                 command: taskItem.name.replace('^', ''),
+                workDir: project.name,
             }],
         };
     }
@@ -15,7 +16,11 @@ export default async (project: any, taskItem: any) => {
     }
 
     const taskName = taskItem.name.replace(':', '');
-    const commands = project.tasks[taskName];
+    const commands = project.tasks[taskName].map((command: any) => {
+        command.workDir = command.workDir || project.name;
+
+        return command;
+    });
 
     if (commands) {
         return {
