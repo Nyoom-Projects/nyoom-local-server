@@ -16,20 +16,21 @@ export default async (project: any, taskItem: any) => {
     }
 
     const taskName = taskItem.name.replace(':', '');
-    const commands = project.tasks[taskName].map((command: any) => {
-        command.workDir = command.workDir || project.name;
 
-        return command;
-    });
+    if (project.tasks[taskName]) {
+        const commands = project.tasks[taskName].map((command: any) => {
+            command.workDir = command.workDir || project.name;
 
-    if (commands) {
+            return command;
+        });
+
         return {
             ...taskItem,
             commands,
         };
     } else {
         throw {
-            message: `Task '${taskName}' does not exist in '${project.name}'`,
+            message: `Task '${taskName}' does not exist in Project '${project.name}'`,
         };
     }
 };

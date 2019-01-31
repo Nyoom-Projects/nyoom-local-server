@@ -19,7 +19,7 @@ class DSCore {
     constructor(loginData: ILoginData, loginCallback: (success: boolean, data: any) => void, errorCallback?: (error: any, args: any) => void) {
         const botCore = this;
 
-        const ds = deepstream('10.5.43.58:7520');
+        const ds = deepstream('127.0.0.1:7520');
         this.nodeName = loginData.nodeName;
         botCore.deepstreamClient = ds.login({
             username: loginData.username,

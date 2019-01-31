@@ -18,14 +18,13 @@ export const queue = async (core: any, projectParameters: string[], taskParamete
 
     projectParameters = projectParameters.filter((projectName: string) => projectName);
     const nonExistantProjects = projectParameters
-        .filter((projectName: string) => projects.filter(
-            (project: any) => project.name.split(project.name.lastIndexOf('/') + 1) === projectName) === 0,
-        );
+        .filter((projectName: string) => projects.filter((project: any) => project.name === projectName).length === 0);
 
     const targetProjects = projects.filter((project: any) => projectParameters.filter(
         (projectName: string) => project.name === projectName).length !== 0,
     );
 
+    console.log('nonExistantProjects', nonExistantProjects)
     console.log('targetProjects', targetProjects)
     if (nonExistantProjects.length !== 0) {
         throw {
@@ -55,7 +54,7 @@ export const queue = async (core: any, projectParameters: string[], taskParamete
             core.publishCommands('mac1', commands);
             return commands;
         }
-        return 'success?';
+        return [];
     }
 };
 
