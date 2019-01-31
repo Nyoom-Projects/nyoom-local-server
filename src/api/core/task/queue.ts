@@ -32,7 +32,7 @@ export const queue = async (core: any, projectParameters: string[], taskParamete
             message: `Projects [${nonExistantProjects.join(',')}] do not exist`,
         };
     } else {
-        for (const project of targetProjects) {
+        return await Promise.all(targetProjects.map(async (project: any) => {
             const taskItemsWithoutCommands = convertTaskStringsToTaskItems(taskParameters);
 
             const taskItems = await Promise.all(
@@ -52,9 +52,11 @@ export const queue = async (core: any, projectParameters: string[], taskParamete
             console.log(commands);
 
             core.publishCommands('mac1', commands);
-            return commands;
-        }
-        return [];
+            return {
+                project,
+                commands,
+            };
+        }));
     }
 };
 
